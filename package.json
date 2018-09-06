@@ -1,0 +1,23 @@
+{
+  "name": "main-site",
+  "version": "1.0.0",
+  "description": "Main site",
+  "main": "index.js",
+  "dependencies": {
+    "pug": "^2.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Poop-Troupe/main-site.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Poop-Troupe/main-site/issues"
+  },
+  "homepage": "https://github.com/Poop-Troupe/main-site#readme"
+}
