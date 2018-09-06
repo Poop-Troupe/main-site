@@ -3,7 +3,7 @@ process       = require 'process'
 fs            = require 'fs'
 path          = require 'path'
 
-npm           = require 'npm'
+pug           = require 'pug'
 
 projectRoot   = __dirname
 genDir        = path.resolve projectRoot, 'generated'
@@ -13,20 +13,35 @@ genDir        = path.resolve projectRoot, 'generated'
 exec  = (cmd)  -> new Promise (resolve) -> child_process.exec cmd, resolve
 mkdir = (path) -> new Promise (resolve) -> fs.mkdir path, resolve
 
-task 'clean', 'Purge generated files', (options) ->
-  await exec "rm -rf #{genDir}"
+wrapTask = (fn) ->
+  (options) ->
+    Promise.resolve()
+      .then        -> fn options
+      .then        -> console.log 'done.'
+      .catch (err) -> console.log "Oops:", err
 
-task 'install', 'Install required packages', (options) ->
-  await exec 'npm install'
+doClean = (options) ->
+  exec "rm -rf #{genDir}"
 
-task 'gen', 'Generate site content from templates', (options) ->
-  invoke 'install'
-  invoke 'clean'
+doInstall = (options) ->
+    exec 'npm install'
 
-  chdir projectRoot
-  await mkdir genDir
+doGenerate = (options) ->
+  Promise.resolve()
+    .then -> doInstall options
+    .then -> doClean   options
+    .then -> chdir     projectRoot
+    .then -> mkdir     genDir
+    .then ->
+      new Promise (resolve) ->
+        pug.renderFile indexPath, options, resolve
 
-task 'pub', 'Publish generated content', (options) ->
-  task 'gen'
+doPublish = (options) ->
+  Promise.resolve()
+    .then -> doGenerate options
+    .then -> # TODO: figure out publishing
 
-  # TODO: figure out publishing
+task 'clean',   'Purge generated files',        wrapTask doClean
+task 'install', 'Install required packages',    wrapTask doInstall
+task 'gen',     'Generate site from templates', wrapTask doGenerate
+task 'pub',     'Publish generated content',    wrapTask doPublish
